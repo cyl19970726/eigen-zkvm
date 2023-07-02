@@ -18,6 +18,21 @@ RUNDIR="${CUR_DIR}/../starkjs"
 #CIRCUIT="poseidon"
 #PILEXECJS="poseidon/main_poseidon.js"
 
+SRS=${CUR_DIR}/../keys/setup_2^${POWER}.key
+BIG_SRS=${CUR_DIR}/../keys/setup_2^${BIG_POWER}.key
+
+if [ ! -f $SRS ]; then
+#   curl https://universal-setup.ams3.digitaloceanspaces.com/setup_2^${POWER}.key -o $SRS
+    ${ZKIT} setup -p ${POWER} -s ${SRS}
+fi
+
+if [ ! -f $BIG_SRS ]; then
+#   curl https://universal-setup.ams3.digitaloceanspaces.com/setup_2^${BIG_POWER}.key -o $BIG_SRS
+    ${ZKIT} setup -p ${BIG_POWER} -s ${BIG_SRS}
+fi
+
+
+
 WORKSPACE=/tmp/aggregation_$CIRCUIT
 rm -rf $WORKSPACE && mkdir -p $WORKSPACE
 
@@ -74,5 +89,7 @@ mkdir -p ./aggregation/$RECURSIVE2_CIRCUIT/
     --o $WORKSPACE/$RECURSIVE_CIRCUIT.const \
     --m $WORKSPACE/$RECURSIVE_CIRCUIT.cm -c $RUNDIR/circuits/$RECURSIVE2_CIRCUIT.circom --i ./aggregation/$RECURSIVE2_CIRCUIT/r2_input.zkin.json 
 
-../target/release/eigen-zkit compile -p bn128 -i $RUNDIR/circuits/$RECURSIVE2_CIRCUIT.circom -l $RUNDIR/node_modules/pil-stark/circuits.bn128 --O2=full -o ./aggregation/$RECURSIVE2_CIRCUIT
 
+../target/release/eigen-zkit compile -p bn128 -i $RUNDIR/circuits/$RECURSIVE2_CIRCUIT.circom -l $RUNDIR/node_modules/pil-stark/circuits.bn128 --O2=full -o ./aggregation/$RECURSIVE2_CIRCUIT/
+
+snarkjs groth16 setup  ./aggregation/$RECURSIVE2_CIRCUIT/$RECURSIVE2_CIRCUIT.r1cs 
